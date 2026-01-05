@@ -1,4 +1,11 @@
 {
-  "seen_slots": [],
-  "updated_at": null
+  "seen_slots": [
+    "2026-03-14|9:00 AM|Surf - Advanced Surf Session",
+    "2026-03-14|2:00 PM|Surf - Intermediate Surf Session",
+    "2026-03-21|8:00 AM|Surf - Beginner Surf Session",
+    "2026-03-28|10:00 AM|Surf - Advanced Surf Session",
+    "2026-04-04|11:00 AM|Surf - Intermediate Surf Session",
+    "2026-04-11|7:00 AM|Surf - Advanced Surf Session"
+  ],
+  "updated_at": "2026-01-05T17:22:17.381319"
 }
