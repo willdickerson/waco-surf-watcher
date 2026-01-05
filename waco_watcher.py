@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Waco Surf availability watcher - sends email alerts when surf sessions open up."""
+"""Waco Surf availability watcher - sends email alerts when NEW surf sessions open up."""
 
 import json
 import os
@@ -14,6 +14,7 @@ import requests
 
 BASE_URL = "https://fareharbor.com"
 FLOW = "784809"
+STATE_FILE = Path(__file__).parent / "last_state.json"
 
 
 def get_config():
@@ -74,8 +75,34 @@ def find_available_slots(start: date, end: date, use_mock: bool = False) -> list
     return sorted(slots, key=lambda x: x["sort_key"])
 
 
-def format_email_html(slots: list[dict], start_date: str, end_date: str) -> str:
+def slot_key(slot: dict) -> str:
+    """Generate a unique key for a slot (for comparison)."""
+    return f"{slot['date']}|{slot['time']}|{slot['session']}"
+
+
+def load_previous_state() -> set[str]:
+    """Load previously seen slot keys."""
+    if STATE_FILE.exists():
+        with open(STATE_FILE) as f:
+            return set(json.load(f).get("seen_slots", []))
+    return set()
+
+
+def save_state(slots: list[dict]):
+    """Save current slot keys for next comparison."""
+    keys = [slot_key(s) for s in slots]
+    with open(STATE_FILE, "w") as f:
+        json.dump({"seen_slots": keys, "updated_at": datetime.now().isoformat()}, f, indent=2)
+
+
+def find_new_slots(current_slots: list[dict], previous_keys: set[str]) -> list[dict]:
+    """Return only slots that weren't in the previous state."""
+    return [s for s in current_slots if slot_key(s) not in previous_keys]
+
+
+def format_email_html(slots: list[dict], start_date: str, end_date: str, is_new: bool = True) -> str:
     """Generate HTML email body."""
+    header = "🏄 NEW Waco Surf Slots!" if is_new else "🏄 Waco Surf Slots Available!"
     rows = "\n".join(
         f"""<tr>
             <td style="padding:8px;border-bottom:1px solid #ddd;">{s['date']}</td>
@@ -92,8 +119,8 @@ def format_email_html(slots: list[dict], start_date: str, end_date: str) -> str:
 <html>
 <head><meta charset="utf-8"></head>
 <body style="font-family:system-ui,sans-serif;max-width:800px;margin:0 auto;padding:20px;">
-    <h2 style="color:#2563eb;">🏄 Waco Surf Slots Available!</h2>
-    <p>Found <strong>{len(slots)}</strong> available session(s) between {start_date} and {end_date}:</p>
+    <h2 style="color:#2563eb;">{header}</h2>
+    <p>Found <strong>{len(slots)}</strong> new session(s) between {start_date} and {end_date}:</p>
     <table style="border-collapse:collapse;width:100%;margin:20px 0;">
         <thead>
             <tr style="background:#f3f4f6;">
@@ -116,7 +143,7 @@ def format_email_html(slots: list[dict], start_date: str, end_date: str) -> str:
 
 def format_email_text(slots: list[dict], start_date: str, end_date: str) -> str:
     """Generate plain text email body."""
-    lines = [f"🏄 Waco Surf Slots Available!", "", f"Found {len(slots)} available session(s) between {start_date} and {end_date}:", ""]
+    lines = ["🏄 NEW Waco Surf Slots!", "", f"Found {len(slots)} new session(s) between {start_date} and {end_date}:", ""]
     for s in slots:
         lines.append(f"• {s['date']} @ {s['time']} - {s['session']} ({s['capacity']} spots)")
         lines.append(f"  Book: {s['book_url']}")
@@ -128,7 +155,7 @@ def format_email_text(slots: list[dict], start_date: str, end_date: str) -> str:
 def send_email(recipients: list[str], slots: list[dict], start_date: str, end_date: str, smtp_user: str, smtp_pass: str):
     """Send notification email via Gmail SMTP."""
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"🏄 {len(slots)} Waco Surf Slot(s) Available ({start_date} - {end_date})"
+    msg["Subject"] = f"🏄 {len(slots)} NEW Waco Surf Slot(s) ({start_date} - {end_date})"
     msg["From"] = smtp_user
     msg["To"] = ", ".join(recipients)
 
@@ -136,7 +163,7 @@ def send_email(recipients: list[str], slots: list[dict], start_date: str, end_da
     msg.attach(MIMEText(format_email_html(slots, start_date, end_date), "html"))
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(smtp_user, smtp_pass.replace('\xa0', ' '))  # Fix non-breaking spaces from copy-paste
+        server.login(smtp_user, smtp_pass.replace('\xa0', ' '))
         server.sendmail(smtp_user, recipients, msg.as_string())
     print(f"Email sent to {', '.join(recipients)}")
 
@@ -158,23 +185,33 @@ def main():
     print(f"Checking Waco Surf availability from {start} to {end}...")
     print(f"Mock mode: {config['use_mock']}")
 
-    slots = find_available_slots(start, end, config["use_mock"])
+    # Load previous state and fetch current availability
+    previous_keys = load_previous_state()
+    print(f"Previously seen: {len(previous_keys)} slot(s)")
 
-    if not slots:
-        print("No available slots found.")
+    current_slots = find_available_slots(start, end, config["use_mock"])
+    print(f"Currently available: {len(current_slots)} slot(s)")
+
+    # Find new slots (not seen before)
+    new_slots = find_new_slots(current_slots, previous_keys)
+    print(f"New slots: {len(new_slots)}")
+
+    # Always save current state for next run
+    save_state(current_slots)
+    print("State saved.")
+
+    if not new_slots:
+        print("No new slots to report.")
         return
-
-    print(f"Found {len(slots)} available slot(s)!")
 
     if not config["smtp_user"] or not config["smtp_pass"]:
         print("SMTP credentials not configured - printing results only:")
-        for s in slots:
+        for s in new_slots:
             print(f"  {s['date']} @ {s['time']} - {s['session']} ({s['capacity']} spots) - {s['book_url']}")
         return
 
-    send_email(config["emails"], slots, config["start_date"], config["end_date"], config["smtp_user"], config["smtp_pass"])
+    send_email(config["emails"], new_slots, config["start_date"], config["end_date"], config["smtp_user"], config["smtp_pass"])
 
 
 if __name__ == "__main__":
     main()
-
