@@ -21,11 +21,11 @@ jobs:
 
       - name: Check availability and send alerts
         env:
-          DATE_RANGE_START: ${{ secrets.DATE_RANGE_START }}
-          DATE_RANGE_END: ${{ secrets.DATE_RANGE_END }}
+          DATE_RANGE_START: ${{ vars.DATE_RANGE_START }}
+          DATE_RANGE_END: ${{ vars.DATE_RANGE_END }}
+          USE_MOCK_DATA: ${{ vars.USE_MOCK_DATA }}
           EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          USE_MOCK_DATA: ${{ secrets.USE_MOCK_DATA }}
         run: python waco_watcher.py
 

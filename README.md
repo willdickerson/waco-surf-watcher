@@ -6,18 +6,23 @@ Monitors [Waco Surf](https://www.wacosurf.com/) for available surf sessions and 
 
 ### 1. Fork/Clone this repo
 
-### 2. Configure GitHub Secrets
+### 2. Configure GitHub Variables and Secrets
 
-Go to **Settings → Secrets and variables → Actions** and add:
+Go to **Settings → Secrets and variables → Actions**
 
-| Secret | Description | Example |
-|--------|-------------|---------|
+**Variables tab** (for non-sensitive config):
+| Variable | Description | Example |
+|----------|-------------|---------|
 | `DATE_RANGE_START` | Start of date range to watch (YYYY-MM-DD) | `2026-03-01` |
 | `DATE_RANGE_END` | End of date range to watch (YYYY-MM-DD) | `2026-04-30` |
+| `USE_MOCK_DATA` | Set to `true` to test with mock data | `false` |
+
+**Secrets tab** (for sensitive data):
+| Secret | Description | Example |
+|--------|-------------|---------|
 | `EMAIL_RECIPIENTS` | Comma-separated email addresses | `you@email.com,friend@email.com` |
 | `SMTP_USER` | Gmail address for sending | `your.alerts@gmail.com` |
 | `SMTP_PASS` | Gmail App Password (not your regular password) | `abcd efgh ijkl mnop` |
-| `USE_MOCK_DATA` | Set to `true` to test with mock data | `false` |
 
 ### 3. Gmail App Password Setup
 
