@@ -1,0 +1,54 @@
+{
+  "availabilities": [
+    {
+      "is_bookable": true,
+      "start_at": "2026-03-14T09:00:00",
+      "item": {"name": "Surf - Advanced Surf Session"},
+      "bookable_capacity": 4,
+      "book_url": "/wacosurf/items/431089/availability/9999901/book/"
+    },
+    {
+      "is_bookable": true,
+      "start_at": "2026-03-14T14:00:00",
+      "item": {"name": "Surf - Intermediate Surf Session"},
+      "bookable_capacity": 6,
+      "book_url": "/wacosurf/items/355557/availability/9999902/book/"
+    },
+    {
+      "is_bookable": true,
+      "start_at": "2026-03-21T08:00:00",
+      "item": {"name": "Surf - Beginner Surf Session"},
+      "bookable_capacity": 10,
+      "book_url": "/wacosurf/items/355552/availability/9999903/book/"
+    },
+    {
+      "is_bookable": true,
+      "start_at": "2026-03-28T10:00:00",
+      "item": {"name": "Surf - Advanced Surf Session"},
+      "bookable_capacity": 2,
+      "book_url": "/wacosurf/items/431089/availability/9999904/book/"
+    },
+    {
+      "is_bookable": true,
+      "start_at": "2026-04-04T11:00:00",
+      "item": {"name": "Surf - Intermediate Surf Session"},
+      "bookable_capacity": 8,
+      "book_url": "/wacosurf/items/355557/availability/9999905/book/"
+    },
+    {
+      "is_bookable": true,
+      "start_at": "2026-04-11T07:00:00",
+      "item": {"name": "Surf - Advanced Surf Session"},
+      "bookable_capacity": 3,
+      "book_url": "/wacosurf/items/431089/availability/9999906/book/"
+    },
+    {
+      "is_bookable": false,
+      "start_at": "2026-04-11T09:00:00",
+      "item": {"name": "Surf - Advanced Surf Session"},
+      "bookable_capacity": 0,
+      "book_url": "/wacosurf/items/431089/availability/9999907/book/"
+    }
+  ]
+}
+

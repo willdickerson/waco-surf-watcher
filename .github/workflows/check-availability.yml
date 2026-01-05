@@ -1,0 +1,31 @@
+name: Check Waco Surf Availability
+
+on:
+  schedule:
+    - cron: '0 * * * *'  # Run every hour
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Check availability and send alerts
+        env:
+          DATE_RANGE_START: ${{ secrets.DATE_RANGE_START }}
+          DATE_RANGE_END: ${{ secrets.DATE_RANGE_END }}
+          EMAIL_RECIPIENTS: ${{ secrets.EMAIL_RECIPIENTS }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          USE_MOCK_DATA: ${{ secrets.USE_MOCK_DATA }}
+        run: python waco_watcher.py
+
