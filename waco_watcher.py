@@ -136,7 +136,7 @@ def send_email(recipients: list[str], slots: list[dict], start_date: str, end_da
     msg.attach(MIMEText(format_email_html(slots, start_date, end_date), "html"))
 
     with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
-        server.login(smtp_user, smtp_pass)
+        server.login(smtp_user, smtp_pass.replace('\xa0', ' '))  # Fix non-breaking spaces from copy-paste
         server.sendmail(smtp_user, recipients, msg.as_string())
     print(f"Email sent to {', '.join(recipients)}")
 
