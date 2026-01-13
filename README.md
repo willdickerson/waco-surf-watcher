@@ -59,5 +59,4 @@ python waco_watcher.py
 1. Queries FareHarbor's API for each day in the configured range
 2. Filters for bookable sessions with available capacity
 3. Sends a formatted HTML email with booking links if slots are found
-4. Does nothing if no availability (no spam!)
-
+4. Does nothing if no availability
